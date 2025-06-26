@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Marquee Test</title>
+    <link rel="stylesheet" href="/express/code/styles/styles.css">
+    <link rel="stylesheet" href="/express/code/blocks/grid-marquee/grid-marquee.css">
+    <style>
+        /* Debug styles to visualize the grid */
+        .debug-grid {
+            outline: 2px dashed red;
+            position: relative;
+        }
+        .debug-grid::before {
+            content: attr(data-debug);
+            position: absolute;
+            top: -20px;
+            left: 0;
+            background: red;
+            color: white;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="section">
+            <div class="grid-marquee debug-grid" data-debug="grid-marquee">
+                
+                <!-- Headline -->
+                <div class="headline debug-grid" data-debug="headline (12 cols)">
+                    <h1>Test Grid Marquee Block</h1>
+                    <p>This should show our responsive grid changes with proper margins and gutters.</p>
+                    <p class="ctas">
+                        <a href="#" class="button">Button 1</a>
+                        <a href="#" class="button">Button 2</a>
+                    </p>
+                </div>
+                
+                <!-- Background (this would normally be hidden) -->
+                <div class="background">
+                    <img src="https://picsum.photos/1200/600?random=1" alt="Background">
+                </div>
+                
+                <!-- Cards Container -->
+                <div class="cards-container debug-grid" data-debug="cards-container">
+                    
+                    <!-- Card 1 -->
+                    <div class="card debug-grid" data-debug="card">
+                        <div class="face">
+                            <img src="https://picsum.photos/300/225?random=2" alt="Card 1">
+                            <p><strong>Card 1 Title</strong></p>
+                            <p>Card content here</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 2 -->
+                    <div class="card debug-grid" data-debug="card">
+                        <div class="face">
+                            <img src="https://picsum.photos/300/225?random=3" alt="Card 2">
+                            <p><strong>Card 2 Title</strong></p>
+                            <p>Card content here</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 3 -->
+                    <div class="card debug-grid" data-debug="card">
+                        <div class="face">
+                            <img src="https://picsum.photos/300/225?random=4" alt="Card 3">
+                            <p><strong>Card 3 Title</strong></p>
+                            <p>Card content here</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Card 4 -->
+                    <div class="card debug-grid" data-debug="card">
+                        <div class="face">
+                            <img src="https://picsum.photos/300/225?random=5" alt="Card 4">
+                            <p><strong>Card 4 Title</strong></p>
+                            <p>Card content here</p>
+                        </div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+        </div>
+    </main>
+    
+    <div style="position: fixed; bottom: 10px; right: 10px; background: black; color: white; padding: 10px; font-family: monospace;">
+        <div>Screen: <span id="screen-width"></span>px</div>
+        <div>Layout: <span id="layout-info"></span></div>
+    </div>
+    
+    <script>
+        function updateScreenInfo() {
+            const width = window.innerWidth;
+            document.getElementById('screen-width').textContent = width;
+            
+            let layout = '';
+            if (width < 600) layout = 'Mobile (2 cols)';
+            else if (width < 920) layout = 'Tablet Small (2 cols)';
+            else if (width < 1200) layout = 'Tablet Large (4 cols)';
+            else if (width < 1680) layout = 'Desktop (4 cols)';
+            else layout = 'XL (4 cols)';
+            
+            document.getElementById('layout-info').textContent = layout;
+        }
+        
+        updateScreenInfo();
+        window.addEventListener('resize', updateScreenInfo);
+    </script>
+</body>
+</html> 

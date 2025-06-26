@@ -1,0 +1,580 @@
+From c9fd97f60231be5fe7c5ba14c009a9622bb42197 Mon Sep 17 00:00:00 2001
+From: Mariah Gardziola <mgardziola@adobe.com>
+Date: Tue, 24 Jun 2025 22:15:26 -0700
+Subject: [PATCH] feat: improve grid-marquee block with responsive design and
+ design tokens
+
+- Add comprehensive radius design tokens (--corner-radius-*)
+- Implement fluid responsive grid using ax-grid system
+- Update mobile ax-grid-margin to 16px for better spacing
+- Optimize card padding: 8px mobile, 12px tablet, 16px desktop
+- Unwrap images from paragraph tags for semantic HTML
+- Apply 8px border-radius consistently using --corner-radius-100
+- Ensure video maintains 4:3 aspect ratio across all breakpoints
+- Fix drawer functionality on mobile/tablet
+- Replace hardcoded px values with spacing/radius tokens
+- Improve video container spacing with proper padding structure
+---
+ .../code/blocks/grid-marquee/grid-marquee.css | 241 +++++++++++-------
+ .../code/blocks/grid-marquee/grid-marquee.js  |  11 +
+ express/code/styles/styles.css                |  16 +-
+ 3 files changed, 176 insertions(+), 92 deletions(-)
+
+diff --git a/express/code/blocks/grid-marquee/grid-marquee.css b/express/code/blocks/grid-marquee/grid-marquee.css
+index 781cb689..b752fdb2 100644
+--- a/express/code/blocks/grid-marquee/grid-marquee.css
++++ b/express/code/blocks/grid-marquee/grid-marquee.css
+@@ -1,7 +1,4 @@
+ .section .grid-marquee {
+-  --m-img-w: 152px;
+-  --t-img-w: 304px;
+-  --d-img-w: 254px;
+   max-width: initial;
+   text-align: center;
+ }
+@@ -14,7 +11,7 @@
+ 
+ main .section .grid-marquee h1 {
+   font-size: var(--heading-font-size-m);
+-  padding-bottom: 8px;
++  padding-bottom: var(--spacing-100);
+ }
+ 
+ .grid-marquee strong,
+@@ -24,8 +21,13 @@ main .section .grid-marquee h1 {
+ }
+ 
+ .grid-marquee .headline {
+-  padding-bottom: 24px;
+-  max-width: 340px;
++  padding-bottom: var(--spacing-400);
++  /* Use ax-grid system margins for consistent spacing */
++  padding-left: var(--ax-grid-margin);
++  padding-right: var(--ax-grid-margin);
++  box-sizing: border-box;
++  width: 100%;
++  max-width: none;
+ }
+ 
+ .grid-marquee .headline p {
+@@ -42,18 +44,20 @@ main .section .grid-marquee h1 {
+   border-color: black;
+ }
+ 
+-.grid-marquee .background  {
+-  width: 100%
++.grid-marquee .background {
++  width: 100%;
+ }
+ 
+ .grid-marquee .background img {
+   position: absolute;
+   top: 50%;
+-  object-fit: fill;
+-  width: 250%;
+-  transform: translate(-50%, -35%);
+-  max-height: 600px;
+-  max-width: 1200px;
++  left: 50%;
++  object-fit: cover;
++  width: 100%;
++  height: 100%;
++  transform: translate(-50%, -50%);
++  max-height: none;
++  max-width: none;
+ }
+ 
+ .grid-marquee .foreground {
+@@ -61,34 +65,40 @@ main .section .grid-marquee h1 {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
++  width: 100%;
+ }
+ 
++/* Use ax-grid system for cards container - exactly like ax-grid-container */
+ .grid-marquee .cards-container {
+-  position: relative;
+-  display: grid;
+-  grid-template-columns: repeat(2, max-content);
+-  grid-template-rows: auto;
+-  gap: 8px;
++  margin-left: var(--ax-grid-margin);
++  margin-right: var(--ax-grid-margin);
++  box-sizing: border-box;
++  display: flex;
++  gap: var(--ax-grid-gutter);
+   justify-content: center;
+-  justify-items: center;
+-  margin: auto;
++  flex-wrap: wrap;
+ }
+ 
++/* Responsive card sizing using ax-grid columns */
+ .grid-marquee .card {
+-  width: 170px;
+-  padding: 8px;
+-  border-radius: 8px;
++  /* Mobile: 2 columns (6 columns each) */
++  width: var(--ax-grid-6-col-width);
++  max-width: 100%;
++  padding: var(--spacing-100);
++  border-radius: var(--spacing-200);
+   border: 1px solid #fff;
+   background: linear-gradient(170.96deg, rgba(255, 255, 255, 0.6) 18.95%, rgba(255, 255, 255, 0.2) 99.73%);
+   text-align: left;
+   display: flex;
+   color: initial;
++  box-sizing: border-box;
+ }
+ 
+ .grid-marquee .face {
+   display: flex;
+   flex-direction: column;
+-  gap: 8px;
++  gap: var(--spacing-200);
++  width: 100%;
+ }
+ 
+ .grid-marquee .face p {
+@@ -99,13 +109,23 @@ main .section .grid-marquee h1 {
+ .grid-marquee .face strong {
+   font-size: 1rem;
+   font-weight: 700;
+-  padding: 0 4px;
++  padding: 0 var(--corner-radius-75);
+   display: inline-block;
+ }
+ 
+ .grid-marquee .face img {
+-  border-radius: 8px;
+-  width: var(--m-img-w);
++  border-radius: var(--corner-radius-100);
++  width: 100%;
++  height: auto;
++  aspect-ratio: 4 / 3;
++  object-fit: cover;
++  /* Ensure proper display whether wrapped in p tag or not */
++  display: block;
++}
++
++/* Remove any empty paragraphs that might be left after image extraction */
++.grid-marquee .face p:empty {
++  display: none;
+ }
+ 
+ .grid-marquee .drawer {
+@@ -113,9 +133,9 @@ main .section .grid-marquee h1 {
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+-  gap: 8px;
+-  border-radius: 16px 16px 0 0;
+-  padding-top: 16px;
++  gap: var(--spacing-200);
++  border-radius: var(--spacing-300) var(--spacing-300) 0 0;
++  padding-top: var(--spacing-300);
+   position: fixed;
+   left: 0;
+   bottom: 0;
+@@ -141,7 +161,7 @@ main .section .grid-marquee h1 {
+ }
+ 
+ .grid-marquee .drawer .title-row {
+-  padding: 0px 16px 12px;
++  padding: 0px var(--spacing-300) var(--spacing-200);
+   font-size: 1.125rem;
+   display: flex;
+   align-items: center;
+@@ -157,20 +177,23 @@ main .section .grid-marquee h1 {
+ }
+ 
+ .grid-marquee .drawer .video-container {
+-  /* override browser button style */
+   border: 0;
+   margin: auto;
+   display: flex;
+   justify-content: center;
+   width: 100%;
+-  padding: 16px 0;
++  padding: var(--spacing-300) var(--spacing-300);
+   cursor: pointer;
+   background: none;
++  box-sizing: border-box;
+ }
+ 
+ .grid-marquee .drawer video {
+-  border-radius: 8px;
+-  width: 328px;
++  border-radius: var(--corner-radius-100);
++  width: 100%;
++  max-width: 400px;
++  aspect-ratio: 4 / 3;
++  object-fit: cover;
+ }
+ 
+ .grid-marquee .panel {
+@@ -185,7 +208,7 @@ main .section .grid-marquee h1 {
+ }
+ 
+ .grid-marquee .panel .drawer-cta {
+-  padding: 16px;
++  padding: var(--spacing-300);
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+@@ -193,7 +216,7 @@ main .section .grid-marquee h1 {
+ 
+ .grid-marquee .panel .drawer-cta .text-group {
+   display: flex;
+-  gap: 16px;
++  gap: var(--spacing-300);
+   align-items: center;
+ }
+ 
+@@ -231,25 +254,25 @@ main .section .grid-marquee h1 {
+ }
+ 
+ .grid-marquee .drawer [role='tablist'] {
+-  padding: 0 0 8px 16px;
++  padding: 0 0 var(--spacing-200) var(--spacing-300);
+ }
+ 
+ .grid-marquee .drawer [role='tab'] {
+   background-color: initial;
+   border: initial;
+-  border-radius: 16px;
+-  padding: 8px 12px;
++  border-radius: var(--spacing-300);
++  padding: var(--spacing-200) var(--spacing-200);
+   font-size: var(--body-font-size-s);
+   color: #292929;
+   cursor: pointer;
+ }
++
+ .grid-marquee .drawer [role='tab'][aria-selected='true'] {
+   background-color: #e1e1e1;
+   font-weight: 700;
+   cursor: initial;
+ }
+ 
+-
+ .grid-marquee .drawer [role='tabpanel'].hide {
+   display: none;
+ }
+@@ -270,8 +293,8 @@ main .section .grid-marquee h1 {
+   justify-content: center;
+   flex-wrap: wrap;
+   align-items: center;
+-  padding-top: 40px;
+-  gap: 12px 48px;
++  padding-top: var(--spacing-600);
++  gap: var(--spacing-200) var(--spacing-700);
+   min-height: 39px;
+ }
+ 
+@@ -283,58 +306,64 @@ main .section .grid-marquee h1 {
+ 
+ .grid-marquee .ratings img {
+   height: 35px;
+-  padding-left: 12px;
++  padding-left: var(--spacing-200);
+   margin: 0;
+ }
+ 
+-@media screen and (min-width: 768px) {
+-  .grid-marquee .background img {
+-    max-width: 1500px;
+-    max-height: 1200px;
+-  }
++/* Tablet small - 2 cards per row (when 4 columns would be too narrow) */
++@media (min-width: 600px) {
+   .grid-marquee .headline {
+-    max-width: 1200px;
++    padding-bottom: var(--spacing-500);
+   }
++
+   .grid-marquee .headline .ctas {
+     display: flex;
+-    margin-top: 16px;
+-    padding-top: 16px;
++    margin-top: var(--spacing-300);
++    padding-top: var(--spacing-300);
+     justify-content: center;
+-    gap: 8px;
++    gap: var(--spacing-200);
+   }
+ 
+   .grid-marquee .headline a.button {
+     margin: 0;
+   }
+ 
+-  .grid-marquee .cards-container {
+-    gap: 8px;
++  .grid-marquee .card {
++    /* Tablet small: Keep 2 columns, 12px padding */
++    padding: var(--spacing-200);
++    border-radius: var(--spacing-300);
+   }
+ 
+-  .grid-marquee .card {
+-    width: 304px;
+-    border-radius: 16px;
++  .grid-marquee .face {
++    gap: var(--spacing-300);
+   }
+ 
+   .grid-marquee .face img {
+-    width: var(--t-img-w);
++    /* Image will fill container width with 4:3 ratio */
+   }
++
+   .grid-marquee .drawer .content {
+     display: flex;
+     flex-direction: column;
+     align-items: center;
+   }
++
+   .grid-marquee .drawer .title-row {
+-    width: 480px;
++    width: min(480px, 90vw);
+   }
++
+   .grid-marquee .drawer video {
+-    width: 480px;
++    width: min(480px, 90vw);
++    aspect-ratio: 4 / 3;
++    object-fit: cover;
++    border-radius: var(--corner-radius-100);
+   }
++
+   .grid-marquee .drawer [role='tablist'] {
+     display: flex;
+     justify-content: center;
+-    padding: 0 0 8px 0;
+-    gap: 8px;
++    padding: 0 0 var(--spacing-200) 0;
++    gap: var(--spacing-200);
+   }
+ 
+   .grid-marquee .panel .drawer-cta-wrapper {
+@@ -343,31 +372,44 @@ main .section .grid-marquee h1 {
+   }
+ 
+   .grid-marquee .drawer .drawer-cta {
+-    width: 480px;
++    width: min(480px, 90vw);
+   }
+ }
+ 
+-@media screen and (min-width: 1280px) {
++/* Tablet large - 4 cards per row (when cards are at least 200px wide) */
++@media (min-width: 920px) {
++  .grid-marquee .card {
++    /* Tablet large: 4 columns (3 ax-grid columns each) */
++    width: var(--ax-grid-3-col-width);
++  }
++}
++
++/* Large desktop breakpoint - flexible card layout */
++@media (min-width: 1200px) {
+   .grid-marquee .express-logo {
+-    padding-top: 40px;
++    padding-top: var(--spacing-600);
+   }
++
+   .grid-marquee .background img {
+-    max-height: 600px;
+-    max-width: 1800px;
++    object-fit: cover;
+   }
++
+   .grid-marquee .headline {
+-    max-width: 1600px;
+-    padding-bottom: 40px;
++    padding-bottom: var(--spacing-600);
+   }
++
+   .grid-marquee .headline.no-cta {
+     padding-bottom: 0;
+   }
++
+   main .section .grid-marquee .headline h1 {
+     font-size: var(--heading-font-size-xl);
+   }
++
+   .grid-marquee .headline .ctas {
+-    padding-top: 24px;
++    padding-top: var(--spacing-400);
+   }
++
+   .grid-marquee .headline a.button {
+     border-width: 1px;
+     padding: 12px 24px 13px 24px;
+@@ -375,31 +417,28 @@ main .section .grid-marquee h1 {
+     border-radius: 50px;
+     line-height: 23.4px;
+   }
+-  .grid-marquee .cards-container {
+-    grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
+-    width: 1200px;
+-    gap: 16px;
+-  }
++
+   .grid-marquee .card {
+-    width: 288px;
+-    padding: 16px;
++    /* Desktop: 3 columns each (4 cards per row) */
++    width: var(--ax-grid-3-col-width);
++    padding: var(--spacing-300);
+     position: relative;
+   }
+ 
+   .grid-marquee .face img {
+-    width: var(--d-img-w);
++    /* Image will fill container width with 4:3 ratio */
+   }
+ 
+   .grid-marquee .face {
+-    gap: 12px;
++    gap: var(--spacing-300);
+   }
+ 
+   .grid-marquee .drawer {
+     visibility: visible;
+     opacity: 1;
+     transition: opacity .4s ease, visibility .4s;
+-    border-radius: 12px;
+-    padding-bottom: 16px;
++    border-radius: var(--spacing-300);
++    padding-bottom: var(--spacing-300);
+     position: absolute;
+     width: 100%;
+     top: 0;
+@@ -423,16 +462,21 @@ main .section .grid-marquee h1 {
+ 
+   .grid-marquee .drawer .video-container {
+     border-top: none;
+-    padding: 0 0 12px 0;
++    padding: 0 0 var(--spacing-300) 0;
+   }
+ 
+   .grid-marquee .drawer video {
+-    width: var(--d-img-w);
+-    height: initial;
++    width: 100%;
++    height: auto;
++    aspect-ratio: 4 / 3;
++    object-fit: cover;
++    border-radius: var(--corner-radius-100);
++    padding: 0;
++    box-sizing: border-box;
+   }
+ 
+   .grid-marquee .drawer div[role='tablist'] {
+-    padding: 0 0 16px 16px;
++    padding: 0 0 var(--spacing-300) var(--spacing-300);
+     display: block;
+   }
+ 
+@@ -447,7 +491,28 @@ main .section .grid-marquee h1 {
+ 
+   .grid-marquee .drawer .panel .drawer-cta {
+     width: initial;
+-    padding: 6px 16px;
+-    font-size: var(--body-font-size-l);
++    padding: var(--spacing-200) var(--spacing-300);
++  }
++}
++
++/* Extra large screens - maintain 4 cards per row */
++@media (min-width: 1680px) {
++  .grid-marquee .card {
++    /* XL: Keep 4 cards per row (3 columns each) */
++    width: var(--ax-grid-3-col-width);
++  }
++
++  .grid-marquee .face img {
++    /* Image will fill container width with 4:3 ratio */
++  }
++
++  .grid-marquee .drawer video {
++    width: 100%;
++    height: auto;
++    aspect-ratio: 4 / 3;
++    object-fit: cover;
++    border-radius: var(--corner-radius-100);
++    padding: 0;
++    box-sizing: border-box;
+   }
+ }
+diff --git a/express/code/blocks/grid-marquee/grid-marquee.js b/express/code/blocks/grid-marquee/grid-marquee.js
+index b7c62de7..cbd65f74 100644
+--- a/express/code/blocks/grid-marquee/grid-marquee.js
++++ b/express/code/blocks/grid-marquee/grid-marquee.js
+@@ -157,6 +157,17 @@ function toCard(drawer) {
+   }, [face, drawer]);
+ 
+   face.classList.add('face');
++  
++  // Unwrap images from paragraph tags for better semantic HTML
++  face.querySelectorAll('p img').forEach((img) => {
++    const p = img.parentElement;
++    if (p.tagName === 'P' && p.children.length === 1) {
++      // Only unwrap if the paragraph contains only the image
++      p.parentNode.insertBefore(img, p);
++      p.remove();
++    }
++  });
++  
+   addCardInteractions(card, drawer);
+   const lazyCB = () => decorateDrawer(videoAnchor.href, face.querySelector('img').src, titleText, panels, panelsFrag, drawer);
+   drawer.classList.add('drawer', 'hide');
+diff --git a/express/code/styles/styles.css b/express/code/styles/styles.css
+index cf0e6702..88a4782f 100644
+--- a/express/code/styles/styles.css
++++ b/express/code/styles/styles.css
+@@ -100,13 +100,21 @@
+   --spacing-800: 64px;
+   --spacing-900: 80px;
+   --spacing-1000: 96px;
++
++  /* Radius */
++  --corner-radius-0: 0;
++  --corner-radius-75: 4px;
++  --corner-radius-80: 6px;
++  --corner-radius-100: 8px;
++  --corner-radius-200: 16px;
++  --corner-radius-500: 100px;
+  
+   --S2-Buttons-Premium: linear-gradient(95.85deg, #b539c8, #7155fa 66%, #3b63fb);
+   --S2-Buttons-Premium-Hover: linear-gradient(96deg, #9C28AF 0%, #6338EE 66%, #274DEA 100%);
+   --S2-Buttons-Premium-Down: linear-gradient(96deg, #871B9A 0%, #5424DB 66%, #1D3ECF 100%);
+   /* current ax-grid system */
+-  --ax-grid-margin: 20px;
+-  --ax-grid-gutter: 16px;
++  --ax-grid-margin: 16px;
++  --ax-grid-gutter: 8px;
+   --ax-grid-container-width: 100%;
+   --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 11) / 12);
+   --ax-grid-1-col-width: calc(var(--ax-grid-column-width) * 1 + var(--ax-grid-gutter) * 0);
+@@ -126,14 +134,14 @@
+ @media (min-width: 600px) {
+   :root {
+     --ax-grid-margin: 32px;
+-    --ax-grid-gutter: 24px;
++    --ax-grid-gutter: 16px;
+   }
+ }
+ 
+ @media (min-width: 1200px) {
+   :root {
+     --ax-grid-margin: 40px;
+-    --ax-grid-gutter: 32px;
++    --ax-grid-gutter: 16px;
+   }
+ }
+ 
+-- 
+2.49.0
+

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grid Marquee Test - Fluid Responsive</title>
+    <link rel="stylesheet" href="/express/code/styles/styles.css">
+    <link rel="stylesheet" href="/express/code/blocks/grid-marquee/grid-marquee.css">
+    <script type="module" src="/express/code/blocks/grid-marquee/grid-marquee.js"></script>
+</head>
+<body>
+    <main>
+        <div class="section">
+            <div class="grid-marquee ratings">
+                <!-- Headline -->
+                <div>
+                    <div>
+                        <h1>The quick and easy app to create anything.</h1>
+                        <p>Make stunning social posts, images, videos, flyers, and more with Adobe Express. Dream it. Make it. Easy.</p>
+                        <p>
+                            <a href="#" class="button">Start 30-day Premium Trial</a>
+                            <a href="#" class="button">Get Adobe Express Free</a>
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Background -->
+                <div>
+                    <div>
+                        <img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=800&fit=crop" alt="Background" loading="lazy">
+                    </div>
+                </div>
+                
+                <!-- Card 1: Get started -->
+                <div>
+                    <div>
+                        <p>
+                            <img src="https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=400&h=300&fit=crop" alt="Get started" loading="lazy">
+                            <a href="#">Video Link</a>
+                        </p>
+                        <p><strong>Get started in the all-in-one editor</strong></p>
+                    </div>
+                    <div>
+                        <p><a href="#">Start from scratch</a></p>
+                        <p><a href="#">Start from your media</a></p>
+                        <p><a href="#">Start from templates</a></p>
+                    </div>
+                </div>
+                
+                <!-- Card 2: Edit your media -->
+                <div>
+                    <div>
+                        <p>
+                            <img src="https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop" alt="Edit media" loading="lazy">
+                            <a href="#">Video Link</a>
+                        </p>
+                        <p><strong>Edit your media in one click</strong></p>
+                    </div>
+                    <div>
+                        <p>Photo</p>
+                        <p><a href="#">Remove Background</a></p>
+                        <p><a href="#">Resize Image</a></p>
+                        <p><a href="#">Crop Image</a></p>
+                        <p><a href="#">Convert JPG to PNG</a></p>
+                    </div>
+                </div>
+                
+                <!-- Card 3: Generative AI -->
+                <div>
+                    <div>
+                        <p>
+                            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=400&h=300&fit=crop" alt="AI features" loading="lazy">
+                            <a href="#">Video Link</a>
+                        </p>
+                        <p><strong>Create fast with generative AI</strong></p>
+                    </div>
+                    <div>
+                        <p><a href="#">Generate Image</a></p>
+                        <p><a href="#">Generate Template</a></p>
+                        <p><a href="#">Generate Fill</a></p>
+                        <p><a href="#">Music Generator</a></p>
+                    </div>
+                </div>
+                
+                <!-- Card 4: Explore content -->
+                <div>
+                    <div>
+                        <p>
+                            <img src="https://images.unsplash.com/photo-1611224923853-80b023f02d71?w=400&h=300&fit=crop" alt="Explore content" loading="lazy">
+                            <a href="#">Video Link</a>
+                        </p>
+                        <p><strong>Explore amazing content</strong></p>
+                    </div>
+                    <div>
+                        <p><a href="#">Templates</a></p>
+                        <p><a href="#">Photos</a></p>
+                        <p><a href="#">Videos</a></p>
+                        <p><a href="#">Design Assets</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script>
+        // Initialize the grid-marquee block
+        document.addEventListener('DOMContentLoaded', async function() {
+            const { default: init } = await import('/express/code/blocks/grid-marquee/grid-marquee.js');
+            const gridMarquee = document.querySelector('.grid-marquee');
+            if (gridMarquee) {
+                init(gridMarquee);
+            }
+        });
+    </script>
+</body>
+</html> 
